@@ -52,6 +52,9 @@ int main(void)
 
     /* 7-segment display interface */
     // TODO: Configure 7-segment display pins
+    PORTB |= _BV(SEGMENT_DATA);
+    PORTD |= _BV(SEGMENT_CLK);
+    PORTD |= _BV(SEGMENT_LATCH);
 
     /* Enable interrupts by setting the global interrupt mask */
     sei();

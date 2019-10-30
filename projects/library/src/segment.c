@@ -65,23 +65,25 @@ void SEG_putc(uint8_t digit,
     /* Put 1st byte to serial data */
     for (i = 0; i < 8; i++) {
         // TODO: Test and send 8 individual "digit" bits
-        if (_BV(7 - i) & digit == 1)
-            GPIO_write(&PORTD, SEGMENT_DATA, 1);
-        else
-            GPIO_write(&PORTD, SEGMENT_DATA, 0);
+        if ((_BV(7 - i) & digit) == 1)
+            GPIO_write(&PORTB, SEGMENT_DATA, _BV(7 - i));
+        //else
+         //   GPIO_write(&PORTD, SEGMENT_DATA, 0);
         SEG_toggle_clk();
     }
     /* Put 2nd byte to serial data */
     for (i = 0; i < 8; i++) {
         // TODO: Test and send 8 individual "position" bits
-        if (_BV(7 - i) & position == 1) {
-            PORTB |= _BV(i);
+        if ((_BV(7 - i) & position) == 1) {
+            GPIO_write(&PORTB, SEGMENT_DATA, _BV(7 - i));
         }
         SEG_toggle_clk();
     }
 
     /* TODO: Generate 1 us latch pulse */
     PORTD |= _BV(SEGMENT_LATCH);
+    _delay_us(1);
+    PORTD &= ~_BV(SEGMENT_LATCH);
 }
 
 /*--------------------------------------------------------------------*/
@@ -89,5 +91,6 @@ void SEG_toggle_clk(void)
 {
     /* TODO: Generate 2 us clock period */
     PORTD ^= _BV(SEGMENT_CLK);
-    _delay_ms(0.001);
+    _delay_us(1);
+    PORTD ^= _BV(SEGMENT_CLK);
 }
