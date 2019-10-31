@@ -43,6 +43,12 @@ uint8_t segment_digit[] = {
     0b11111001,      // Digit 1
     0b10100100,      // Digit 2
     // TODO: Set segments for other digits
+    0b10110000,      // Digit 3
+    0b10011000,      // Digit 4
+    0b10010010,      // Digit 5
+    0b10000010,      // Digit 6
+    0b11111000,      // Digit 7
+    0b10000000,      // Digit 8
     0b10011000};     // Digit 9
 
 /* Active high position 0 to 3 */
@@ -65,18 +71,19 @@ void SEG_putc(uint8_t digit,
     /* Put 1st byte to serial data */
     for (i = 0; i < 8; i++) {
         // TODO: Test and send 8 individual "digit" bits
-        if ((_BV(7 - i) & digit) == 1)
-            GPIO_write(&PORTB, SEGMENT_DATA, _BV(7 - i));
-        //else
-         //   GPIO_write(&PORTD, SEGMENT_DATA, 0);
+        if ((_BV(7 - i) & digit) > 0)
+            GPIO_write(&PORTB, SEGMENT_DATA, 1);
+        else
+            GPIO_write(&PORTB, SEGMENT_DATA, 0);
         SEG_toggle_clk();
     }
     /* Put 2nd byte to serial data */
     for (i = 0; i < 8; i++) {
         // TODO: Test and send 8 individual "position" bits
-        if ((_BV(7 - i) & position) == 1) {
-            GPIO_write(&PORTB, SEGMENT_DATA, _BV(7 - i));
-        }
+        if ((_BV(7 - i) & position) > 1)
+            GPIO_write(&PORTB, SEGMENT_DATA, 1);
+        else 
+            GPIO_write(&PORTB, SEGMENT_DATA, 0);
         SEG_toggle_clk();
     }
 
@@ -90,7 +97,7 @@ void SEG_putc(uint8_t digit,
 void SEG_toggle_clk(void)
 {
     /* TODO: Generate 2 us clock period */
-    PORTD ^= _BV(SEGMENT_CLK);
+    PORTD |= _BV(SEGMENT_CLK);
     _delay_us(1);
-    PORTD ^= _BV(SEGMENT_CLK);
+    PORTD &= ~_BV(SEGMENT_CLK);
 }

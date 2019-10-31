@@ -52,9 +52,13 @@ int main(void)
 
     /* 7-segment display interface */
     // TODO: Configure 7-segment display pins
-    PORTB |= _BV(SEGMENT_DATA);
-    PORTD |= _BV(SEGMENT_CLK);
-    PORTD |= _BV(SEGMENT_LATCH);
+    DDRB |= _BV(SEGMENT_DATA);
+    DDRD |= _BV(SEGMENT_CLK);
+    DDRD |= _BV(SEGMENT_LATCH);
+    
+    //TIMER_0
+    TIM_config_prescaler(TIM0, TIM_PRESC_256);
+    TIM_config_interrupt(TIM0, TIM_OVERFLOW_ENABLE);
 
     /* Enable interrupts by setting the global interrupt mask */
     sei();
@@ -75,4 +79,52 @@ ISR(PCINT1_vect)
 {
     // TODO: Toggle a led
      PORTB ^= _BV(LED_D1);
+}
+
+ISR(TIMER0_OVF_vect)
+{
+    static uint8_t segment = 0;
+    segment++;
+    segment %= 4;
+
+    static uint8_t j = 0; //jednotky
+    static uint8_t d = 0; //desitky
+    static uint8_t s = 0; //stovky
+    static uint8_t t = 0; //tisice
+    
+    switch(segment)
+    {
+        case 0:
+            SEG_putc(j, segment);
+            break;
+        case 1:
+            SEG_putc(d, segment);
+            break;
+        case 2:
+            SEG_putc(s, segment);
+            break;
+        case 3:
+            SEG_putc(t, segment);
+            break;
+        default:
+            SEG_putc(0, segment);
+    }
+
+    j++;
+
+    if (j == 9) {
+        j = 0;
+        d++;
+    }
+    if (d == 9 && j == 9) {
+        j = 0;
+        d = 0;
+        s++;
+    }
+    if (s == 9 && d == 9 && j == 9) {
+        j = 0;
+        d = 0;
+        s = 0;
+        t++;
+    }
 }
