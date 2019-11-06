@@ -334,7 +334,7 @@
 # error "no UART definition for MCU available"
 #endif /* if defined(__AVR_AT90S2313__) || defined(__AVR_AT90S4414__) || defined(__AVR_AT90S8515__) || defined(__AVR_AT90S4434__) || defined(__AVR_AT90S8535__) || defined(__AVR_ATmega103__) */
 
-
+a
 /*
  *  module global variables
  */
