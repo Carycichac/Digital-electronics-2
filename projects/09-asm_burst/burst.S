@@ -48,34 +48,9 @@ rand4_asm:
     pop result              ; Restore "Result" from Stack
     ret                     ; Return from subroutine
 
-;*----------------------------------------------------------------------
-;* LFSR-based 8-bit pseudo-random generator.
-;* Input:  r24 - Current value of shift register
-;* Return: r24 - New value of shift register
-.global rand8_asm
-rand8_asm:
-    push result             ; Backup values to Stack
-    push temp
 
-    bst input, 7            ; Xor "Input" bit 7 and 5
-    bld result, 0
-    bst input, 5
-    bld temp, 0
-    eor result, temp
-
-    bst input, 4            ; Xor "Input" bit 4 with subresult
-    bld temp, 0
-    eor result, temp
-
-    bst input, 3            ; Xor "Input" bit 3 with subresult
-    bld temp, 0
-    eor result, temp
-
-    lsl input               ; Update new value in shift register
-    com result
-    bst result, 0
-    bld input, 0
-
-    pop temp                ; Restore values from Stack end return
-    pop result
-    ret
+.global burst_asm
+burst_asm:
+    sbi $18, 0 ;
+    cbi $18, 0 ;
+    
