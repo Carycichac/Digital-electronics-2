@@ -26,6 +26,7 @@
 #include "lcd.h"
 #include "uart.h"
 //#include "PS2.h"
+#include "twi.h"
 
 /* Typedef -----------------------------------------------------------*/
 /* Define ------------------------------------------------------------*/
@@ -45,10 +46,9 @@ int main(void)
 {
     uart_init(UART_BAUD_SELECT(UART_BAUD_RATE, F_CPU));
 
+    twi_init();
+
     sei();
-    
-    DDRB &= ~(_BV(DATA) | _BV(CLOCK));
-    PORTB &= ~(_BV(DATA) | _BV(CLOCK));
 
     TIM_config_prescaler(TIM1, TIM_PRESC_8);
     TIM_config_interrupt(TIM1, TIM_OVERFLOW_ENABLE);
@@ -61,11 +61,14 @@ int main(void)
 
 ISR(TIMER1_OVF_vect)
 {
-    uint8_t symbol = 0;
-    char symbol_string[3];
     
-    symbol = uart_getc();
-    itoa(symbol, symbol_string, 10);
-    uart_puts(symbol_string);
+    uint8_t symbol = 0;
 
+    twi_start(0x00);
+    symbol = twi_read_ack();
+    twi_stop();
+    //PS2_SYM(symbol);
+    if (symbol == 0x3a) {
+        uart_putc('m');
+    }
 }

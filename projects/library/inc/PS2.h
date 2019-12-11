@@ -9,3 +9,5 @@
 #define PS2_CLK     PB4
 
 void PS2_SYM(uint8_t symbol);
+
+#endif
