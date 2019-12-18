@@ -20,6 +20,7 @@
 
 /* Includes ----------------------------------------------------------*/
 #include <stdlib.h>             // itoa() function
+#include <stdio.h> 
 #include <avr/io.h>
 #include <avr/interrupt.h>
 #include <math.h>
@@ -31,8 +32,8 @@
 
 /* Typedef -----------------------------------------------------------*/
 /* Define ------------------------------------------------------------*/
-#define DATA          PC4
-#define CLOCK         PC5
+#define DATA          PD2
+#define CLOCK         PD4
 #define UART_BAUD_RATE 9600
 
 /* Variables ---------------------------------------------------------*/
@@ -43,28 +44,22 @@
  *  Input:  None
  *  Return: None
  */
-int i = 0;
-uint8_t clk_act = 2;
 
+int i = 11;
+uint8_t tmp[11];
 
 int main(void)
 {
-    DDRC |= _BV(DATA);
-    DDRC |= _BV(CLOCK);                       
-    PORTC &= ~_BV(DATA);
-    PORTC &= ~_BV(CLOCK);
+    DDRD &= ~_BV(DATA);                   
+    PORTD |= _BV(DATA);
+    PORTD |= _BV(CLOCK);
   
-    //uint8_t clk_act = CLOCK;       
-
-
     uart_init(UART_BAUD_SELECT(UART_BAUD_RATE, F_CPU));
 
-    twi_init();
+    EICRA = 1<<ISC01;
+    EIMSK |= _BV(INT0);
 
-    TIM_config_prescaler(TIM0, TIM_PRESC_1);
-    TIM_config_interrupt(TIM0, TIM_OVERFLOW_ENABLE);
-
-       sei();
+    sei();
 
     for (;;) {
     }
@@ -72,43 +67,17 @@ int main(void)
     return (0);
 }
 
-ISR(TIMER0_OVF_vect)
+ISR(INT0_vect)
 {
-    uint8_t clk_bef = clk_act;
-    uint8_t tmp[11];
-    uint8_t sym = 0;
-    char txt[4];
-
-    if (i > 11) i = 0;
-
-    clk_act = CLOCK;
-
-    if (clk_bef == 1 && clk_act == 0 && i < 11) 
-    {
-        tmp[i] = DATA;
-        i++;
-    }
-
-    if (i == 11)
-    {
-        i = 0;
-        for (int j = 7; j >= 0; j--)
-        {
-            sym += tmp[j] * pow(2, j);
-        }
-        itoa(sym, txt, 16);
-        uart_puts(txt);
-    }
-
-    /*
-    uint8_t symbol = 0;
-
-    twi_start(0x00);
-    symbol = twi_read_ack();
-    twi_stop();
-    //PS2_SYM(symbol);
-    if (symbol == 0x3a) {
-        uart_putc('m');
-    }*/
-
+    if((i < 9) && (i > 2)) {  
+        //tmp[i] = DATA;   
+        if (DATA == 1)
+            uart_puts("1");
+        else if (DATA==0)
+            uart_puts("0");
+        else
+            uart_puts("2");
+   }  
+    i--;
+    if (i <= 2) i = 11;
 }
